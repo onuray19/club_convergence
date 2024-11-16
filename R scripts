@@ -1,0 +1,36 @@
+library(rworldmap)
+library(ConvergenceClubs)
+library(ggplot2)
+library(readxl)
+
+index1 <- read.delim("C:/Users/ONUR/Desktop/index1.txt")
+clubs <-findClubs(index1, dataCols=2:154, unit_names = 1, refCol=154,time_trim = 0.333, HACmethod = "FQSB",cstar = 0, cstar_method = 'incremental', cstar_increment = 0.1) 
+mclubs <- mergeClubs(clubs, mergeMethod = c("PS", "vLT"), threshold = -1.65, mergeDivergent = FALSE, estar = -1.65) 
+summary(mclubs)
+
+dev.new(width=8, height=6)
+plot(clubs,legend=TRUE,cex=1, plot_args=list(lwd=0.5,lty=1, type='o',xmarks=seq(1,13),xlabs=seq(2012,2024), xlabs_dir=0, xlab='', ylab=''), legend_args=list(cex=1.2, max_length_labels=6, y.intersp=0.205, lwd=1))
+
+colnames(clubs)[colnames(clubs) == "X...country"] <- "country"
+convergencemap<- joinCountryData2Map(clubs, joinCode = "ISO3", nameJoinColumn = "country")
+colnames(clubs) <- trimws(colnames(clubs))
+colnames(clubs) <- gsub("﻿", "", colnames(clubs))
+countrynames <- convergencemap$NAME
+countrycodes <- convergencemap$ADM0_A3
+deneme <- data.frame(countrycodes,countrynames)
+
+dev.new(width=8, height=6)
+plot <- mapCountryData(convergencemap
+                       , nameColumnToPlot="convergency"
+                       , oceanCol = "azure2"
+                       , catMethod="categorical"
+                       , missingCountryCol = gray(.8)
+                       , mapRegion="world"
+                       , colourPalette=c("orange",
+                                         "cadetblue3",
+                                         "burlywood4",
+                                         "brown",
+                                         "blue",
+                                         "purple",
+                                         "pink")
+                       , mapTitle = "Club Convergence Map with 7 Colours")
